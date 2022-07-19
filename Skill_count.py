@@ -23,16 +23,21 @@ def skillclear(jobcat):
     sql = f'SELECT joburl,jobcat,skill FROM job where jobcat ="{jobcat}";'
     df = con_sql(db,sql)
     
+    # STEP1 拆分 skill 欄位，將不同技能分為多欄
     df['skill'].replace(' / ', '/')
     df_skill = df['skill'].str.split('/', expand=True)
+    
+    # STEP2 將欄索引旋轉為列索引，並置於列索引最內層
     df_skill = df_skill.stack()
+    
+    # STEP3 不保留層級為 1 的索引，並加回原 Dataframe
     df_skill = df_skill.reset_index(level=1, drop=True).rename('skill1')
     df_new = df.drop(['skill'], axis=1).join(df_skill)
 
 
     ''' #新 datafrrame 匯入新 table '''
 
-    DB_HOST = 'dream.127.0.0.1'
+    DB_HOST = '127.0.0.1'
     DB_PORT = '3306'
     DATABASE = 'dream'
     DB_USER = 'root'
